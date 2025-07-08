@@ -17,6 +17,7 @@ class PicAI {
         this.liveCtx = null;
         this.detectionInterval = null;
         this.lastDetectedFaces = [];
+        this.currentEffect = 'blur'; // Default effect
         
         this.initializeApp();
     }
@@ -67,6 +68,7 @@ class PicAI {
     addLiveDetectionButton() {
         const controls = document.querySelector('.camera-controls');
         
+        // Live detection button
         const liveBtn = document.createElement('button');
         liveBtn.className = 'btn';
         liveBtn.id = 'liveBlurBtn';
@@ -81,6 +83,62 @@ class PicAI {
         
         liveBtn.onclick = () => this.toggleLiveDetection();
         controls.appendChild(liveBtn);
+        
+        // Effect selector buttons
+        const effectContainer = document.createElement('div');
+        effectContainer.style.position = 'absolute';
+        effectContainer.style.top = '-120px';
+        effectContainer.style.left = '50%';
+        effectContainer.style.transform = 'translateX(-50%)';
+        effectContainer.style.display = 'flex';
+        effectContainer.style.gap = '10px';
+        effectContainer.style.flexWrap = 'wrap';
+        effectContainer.style.justifyContent = 'center';
+        
+        // Effect options
+        const effects = [
+            { name: 'blur', emoji: '🌫️', label: 'Verwischen' },
+            { name: 'smiley', emoji: '😊', label: 'Smiley' },
+            { name: 'sunglasses', emoji: '😎', label: 'Sonnenbrille' },
+            { name: 'heart_eyes', emoji: '😍', label: 'Herzaugen' },
+            { name: 'wink', emoji: '😉', label: 'Zwinkern' },
+            { name: 'cool', emoji: '😎', label: 'Cool' }
+        ];
+        
+        this.currentEffect = 'blur'; // Default effect
+        
+        effects.forEach(effect => {
+            const btn = document.createElement('button');
+            btn.className = 'effect-btn';
+            btn.textContent = effect.emoji;
+            btn.title = effect.label;
+            btn.style.background = effect.name === 'blur' ? '#007AFF' : '#666';
+            btn.style.color = 'white';
+            btn.style.border = 'none';
+            btn.style.borderRadius = '50%';
+            btn.style.width = '40px';
+            btn.style.height = '40px';
+            btn.style.fontSize = '20px';
+            btn.style.cursor = 'pointer';
+            btn.style.transition = 'all 0.2s';
+            
+            btn.onclick = () => {
+                // Update active effect
+                this.currentEffect = effect.name;
+                
+                // Update button styles
+                effectContainer.querySelectorAll('.effect-btn').forEach(b => {
+                    b.style.background = '#666';
+                });
+                btn.style.background = '#007AFF';
+                
+                this.showError(`Effekt: ${effect.label}`, 1500);
+            };
+            
+            effectContainer.appendChild(btn);
+        });
+        
+        controls.appendChild(effectContainer);
     }
 
     async setupCamera() {
@@ -119,12 +177,12 @@ class PicAI {
         if (this.isLiveDetectionActive) {
             // Stop live detection
             this.stopLiveDetection();
-            liveBtn.textContent = 'Live-Verwischung';
+            liveBtn.textContent = 'Live-Effekte';
             liveBtn.style.background = '#FF6B35';
         } else {
             // Start live detection
             this.startLiveDetection();
-            liveBtn.textContent = 'Live-Verwischung AUS';
+            liveBtn.textContent = 'Live-Effekte AUS';
             liveBtn.style.background = '#ff4444';
         }
     }
@@ -143,7 +201,7 @@ class PicAI {
             this.detectAndBlurLive();
         }, 200);
         
-        this.showError('Live-Gesichtsverwischung aktiv', 2000);
+        this.showError(`Live-Effekte aktiv: ${this.getEffectName()}`, 2000);
     }
 
     stopLiveDetection() {
@@ -158,7 +216,19 @@ class PicAI {
         this.liveCtx.clearRect(0, 0, this.liveCanvas.width, this.liveCanvas.height);
         this.lastDetectedFaces = [];
         
-        this.showError('Live-Gesichtsverwischung deaktiviert', 2000);
+        this.showError('Live-Effekte deaktiviert', 2000);
+    }
+
+    getEffectName() {
+        const effects = {
+            'blur': 'Verwischen',
+            'smiley': 'Smiley 😊',
+            'sunglasses': 'Sonnenbrille 😎',
+            'heart_eyes': 'Herzaugen 😍',
+            'wink': 'Zwinkern 😉',
+            'cool': 'Cool 🤩'
+        };
+        return effects[this.currentEffect] || 'Verwischen';
     }
 
     async detectAndBlurLive() {
@@ -201,23 +271,84 @@ class PicAI {
 
     applyLiveBlur(faces) {
         faces.forEach(face => {
-            // Create blur effect on overlay canvas
-            const gradient = this.liveCtx.createRadialGradient(
-                face.x, face.y, 0,
-                face.x, face.y, face.radius
-            );
-            gradient.addColorStop(0, 'rgba(60, 60, 60, 0.9)');
-            gradient.addColorStop(0.5, 'rgba(80, 80, 80, 0.8)');
-            gradient.addColorStop(1, 'rgba(100, 100, 100, 0.6)');
-            
-            this.liveCtx.fillStyle = gradient;
-            this.liveCtx.beginPath();
-            this.liveCtx.arc(face.x, face.y, face.radius, 0, 2 * Math.PI);
-            this.liveCtx.fill();
-            
-            // Add pixelation effect for live blur
-            this.applyLivePixelation(face);
+            switch(this.currentEffect) {
+                case 'blur':
+                    this.applyBlurEffect(face);
+                    break;
+                case 'smiley':
+                    this.applyEmojiEffect(face, '😊');
+                    break;
+                case 'sunglasses':
+                    this.applyEmojiEffect(face, '😎');
+                    break;
+                case 'heart_eyes':
+                    this.applyEmojiEffect(face, '😍');
+                    break;
+                case 'wink':
+                    this.applyEmojiEffect(face, '😉');
+                    break;
+                case 'cool':
+                    this.applyEmojiEffect(face, '🤩');
+                    break;
+                default:
+                    this.applyBlurEffect(face);
+            }
         });
+    }
+
+    applyBlurEffect(face) {
+        // Original blur effect
+        const gradient = this.liveCtx.createRadialGradient(
+            face.x, face.y, 0,
+            face.x, face.y, face.radius
+        );
+        gradient.addColorStop(0, 'rgba(60, 60, 60, 0.9)');
+        gradient.addColorStop(0.5, 'rgba(80, 80, 80, 0.8)');
+        gradient.addColorStop(1, 'rgba(100, 100, 100, 0.6)');
+        
+        this.liveCtx.fillStyle = gradient;
+        this.liveCtx.beginPath();
+        this.liveCtx.arc(face.x, face.y, face.radius, 0, 2 * Math.PI);
+        this.liveCtx.fill();
+        
+        // Add pixelation effect
+        this.applyLivePixelation(face);
+    }
+
+    applyEmojiEffect(face, emoji) {
+        // Create circular background
+        const gradient = this.liveCtx.createRadialGradient(
+            face.x, face.y, 0,
+            face.x, face.y, face.radius
+        );
+        gradient.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
+        gradient.addColorStop(0.7, 'rgba(255, 255, 255, 0.8)');
+        gradient.addColorStop(1, 'rgba(255, 255, 255, 0.6)');
+        
+        this.liveCtx.fillStyle = gradient;
+        this.liveCtx.beginPath();
+        this.liveCtx.arc(face.x, face.y, face.radius, 0, 2 * Math.PI);
+        this.liveCtx.fill();
+        
+        // Draw emoji
+        const fontSize = face.radius * 1.5; // Make emoji slightly bigger than face
+        this.liveCtx.font = `${fontSize}px Arial`;
+        this.liveCtx.textAlign = 'center';
+        this.liveCtx.textBaseline = 'middle';
+        
+        // Add shadow for better visibility
+        this.liveCtx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+        this.liveCtx.shadowBlur = 4;
+        this.liveCtx.shadowOffsetX = 2;
+        this.liveCtx.shadowOffsetY = 2;
+        
+        this.liveCtx.fillText(emoji, face.x, face.y);
+        
+        // Reset shadow
+        this.liveCtx.shadowColor = 'transparent';
+        this.liveCtx.shadowBlur = 0;
+        this.liveCtx.shadowOffsetX = 0;
+        this.liveCtx.shadowOffsetY = 0;
     }
 
     applyLivePixelation(face) {
@@ -349,7 +480,7 @@ class PicAI {
         // Stop live detection when showing results
         if (this.isLiveDetectionActive) {
             this.stopLiveDetection();
-            document.getElementById('liveBlurBtn').textContent = 'Live-Verwischung';
+            document.getElementById('liveBlurBtn').textContent = 'Live-Effekte';
             document.getElementById('liveBlurBtn').style.background = '#FF6B35';
         }
 
@@ -597,7 +728,7 @@ class PicAI {
         // Reset live detection button
         const liveBtn = document.getElementById('liveBlurBtn');
         if (liveBtn) {
-            liveBtn.textContent = 'Live-Verwischung';
+            liveBtn.textContent = 'Live-Effekte';
             liveBtn.style.background = '#FF6B35';
         }
     }
