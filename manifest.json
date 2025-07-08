@@ -2,7 +2,7 @@
   "name": "PicAI - Smart Photo Analysis",
   "short_name": "PicAI",
   "description": "AI-powered photo analysis with automatic face blurring",
-  "start_url": "/picai-pwa/",
+  "start_url": "dg1001.github.io/picai-pwa/",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#007AFF",
