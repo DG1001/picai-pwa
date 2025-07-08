@@ -66,34 +66,8 @@ class PicAI {
     }
 
     addLiveDetectionButton() {
-        const controls = document.querySelector('.camera-controls');
-        
-        // Live detection button
-        const liveBtn = document.createElement('button');
-        liveBtn.className = 'btn';
-        liveBtn.id = 'liveBlurBtn';
-        liveBtn.textContent = 'Live-Verwischung';
-        liveBtn.style.position = 'absolute';
-        liveBtn.style.top = '-60px';
-        liveBtn.style.left = '50%';
-        liveBtn.style.transform = 'translateX(-50%)';
-        liveBtn.style.background = '#FF6B35';
-        liveBtn.style.padding = '8px 16px';
-        liveBtn.style.fontSize = '14px';
-        
-        liveBtn.onclick = () => this.toggleLiveDetection();
-        controls.appendChild(liveBtn);
-        
         // Effect selector buttons
-        const effectContainer = document.createElement('div');
-        effectContainer.style.position = 'absolute';
-        effectContainer.style.top = '-120px';
-        effectContainer.style.left = '50%';
-        effectContainer.style.transform = 'translateX(-50%)';
-        effectContainer.style.display = 'flex';
-        effectContainer.style.gap = '10px';
-        effectContainer.style.flexWrap = 'wrap';
-        effectContainer.style.justifyContent = 'center';
+        const effectContainer = document.getElementById('effectSelector');
         
         // Effect options
         const effects = [
@@ -102,7 +76,7 @@ class PicAI {
             { name: 'sunglasses', emoji: '😎', label: 'Sonnenbrille' },
             { name: 'heart_eyes', emoji: '😍', label: 'Herzaugen' },
             { name: 'wink', emoji: '😉', label: 'Zwinkern' },
-            { name: 'cool', emoji: '😎', label: 'Cool' }
+            { name: 'cool', emoji: '🤩', label: 'Cool' }
         ];
         
         this.currentEffect = 'blur'; // Default effect
@@ -112,15 +86,11 @@ class PicAI {
             btn.className = 'effect-btn';
             btn.textContent = effect.emoji;
             btn.title = effect.label;
-            btn.style.background = effect.name === 'blur' ? '#007AFF' : '#666';
-            btn.style.color = 'white';
-            btn.style.border = 'none';
-            btn.style.borderRadius = '50%';
-            btn.style.width = '40px';
-            btn.style.height = '40px';
-            btn.style.fontSize = '20px';
-            btn.style.cursor = 'pointer';
-            btn.style.transition = 'all 0.2s';
+            btn.dataset.effect = effect.name;
+            
+            if (effect.name === 'blur') {
+                btn.classList.add('active');
+            }
             
             btn.onclick = () => {
                 // Update active effect
@@ -128,9 +98,9 @@ class PicAI {
                 
                 // Update button styles
                 effectContainer.querySelectorAll('.effect-btn').forEach(b => {
-                    b.style.background = '#666';
+                    b.classList.remove('active');
                 });
-                btn.style.background = '#007AFF';
+                btn.classList.add('active');
                 
                 this.showError(`Effekt: ${effect.label}`, 1500);
             };
@@ -138,7 +108,9 @@ class PicAI {
             effectContainer.appendChild(btn);
         });
         
-        controls.appendChild(effectContainer);
+        // Setup live toggle button
+        const liveBtn = document.getElementById('liveBlurBtn');
+        liveBtn.onclick = () => this.toggleLiveDetection();
     }
 
     async setupCamera() {
@@ -178,12 +150,12 @@ class PicAI {
             // Stop live detection
             this.stopLiveDetection();
             liveBtn.textContent = 'Live-Effekte';
-            liveBtn.style.background = '#FF6B35';
+            liveBtn.classList.remove('active');
         } else {
             // Start live detection
             this.startLiveDetection();
             liveBtn.textContent = 'Live-Effekte AUS';
-            liveBtn.style.background = '#ff4444';
+            liveBtn.classList.add('active');
         }
     }
 
@@ -481,7 +453,7 @@ class PicAI {
         if (this.isLiveDetectionActive) {
             this.stopLiveDetection();
             document.getElementById('liveBlurBtn').textContent = 'Live-Effekte';
-            document.getElementById('liveBlurBtn').style.background = '#FF6B35';
+            document.getElementById('liveBlurBtn').classList.remove('active');
         }
 
         document.getElementById('cameraView').style.display = 'none';
@@ -729,7 +701,7 @@ class PicAI {
         const liveBtn = document.getElementById('liveBlurBtn');
         if (liveBtn) {
             liveBtn.textContent = 'Live-Effekte';
-            liveBtn.style.background = '#FF6B35';
+            liveBtn.classList.remove('active');
         }
     }
 
