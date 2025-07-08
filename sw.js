@@ -1,11 +1,11 @@
 const CACHE_NAME = 'picai-v1';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/app.js',
-  '/manifest.json',
-  '/icon-192.png',
-  '/icon-512.png'
+  '/picai-pwa/',
+  '/picai-pwa/index.html',
+  '/picai-pwa/app.js',
+  '/picai-pwa/manifest.json',
+  '/picai-pwa/icon-192.png',
+  '/picai-pwa/icon-512.png'
 ];
 
 self.addEventListener('install', event => {
