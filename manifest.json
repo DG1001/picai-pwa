@@ -1,0 +1,26 @@
+{
+  "name": "PicAI - Smart Photo Analysis",
+  "short_name": "PicAI",
+  "description": "AI-powered photo analysis with automatic face blurring",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#007AFF",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "permissions": [
+    "camera"
+  ],
+  "categories": ["photo", "utilities", "productivity"]
+}
